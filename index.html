@@ -1,0 +1,217 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <link
+      href="https://cdn.jsdelivr.net/npm/bootstrap@5.0.2/dist/css/bootstrap.min.css"
+      rel="stylesheet"
+      integrity="sha384-EVSTQN3/azprG1Anm3QDgpJLIm9Nao0Yz1ztcQTwFspd3yD65VohhpuuCOmLASjC"
+      crossorigin="anonymous"
+    />
+    <script
+      src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/3.7.1/chart.min.js"
+      integrity="sha512-QSkVNOCYLtj73J4hbmVoOV6KVZuMluZlioC+trLpewV8qMjsWqlIQvkn1KGX2StWvPMdWGBqim1xlC8krl1EKQ=="
+      crossorigin="anonymous"
+      referrerpolicy="no-referrer"
+    ></script>
+    <title>JANEESABELLACLARK</title>
+  </head>
+  <body>
+    <nav class="navbar navbar-light bg-light">
+      <div class="container-fluid">
+        <a class="navbar-brand" href="#">Scientific Computing</a>
+      </div>
+    </nav>
+
+    <div class="row">
+      <div class="d-none d-sm-block col-sm-2 col-md-2 bg-light p-3 border">
+        .col-3: width of 25%
+      </div>
+      <div class="col-sm-10 col-md-10 bg-light p-3 border">
+        <div class="input-group input-group-lg">
+          <span class="input-group-text" id="inputGroup-sizing-lg"
+            >Numbers</span
+          >
+          <input
+            type="text"
+            class="form-control"
+            id="set"
+            oninput="calculateMMM(this)"
+            aria-label="Sizing example input"
+            aria-describedby="inputGroup-sizing-lg"
+          />
+        </div>
+        <!-- Mean -->
+        <div class="container p-2">
+          <div class="container">
+            <div class="row">
+              <div class="col">
+                <p>mean</p>
+                <h3 id="mean-id"></h3>
+              </div>
+              <div class="col">
+                <p>median</p>
+                <h3 id="median-id"></h3>
+              </div>
+              <div class="col">
+                <p>mode</p>
+                <h3 id="mode-id"></h3>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div class="container">
+            <button type="button" onclick="add()">Add</button>
+          <div>
+            <canvas id="myChart"> </canvas>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <style></style>
+
+    <script>
+    var myChartData = [];
+    var data = {
+        datasets: [
+          {
+            label: "First Dataset",
+            data: myChartData,
+            backgroundColor: "rgb(255, 99, 132)"
+          }
+        ]
+      };
+    var config = {
+        type: "bubble",
+        data: data,
+        options: {}
+      };
+    var myChart = new Chart(document.getElementById("myChart"), config);    
+
+    function updateChart(chart,data){
+        chart.data.datasets.forEach((dataset) => {
+            dataset.data.push(data);
+        });
+        chart.update();    
+    }
+       
+    
+      function validateInput(data) {
+        for (let i = 0; i < data.length; i++) {
+          let p = data[i];
+          let isValid = typeof p == "number" ? true : false;
+          if (!isValid) {
+            return false;
+            break;
+          }
+        }
+        return true;
+      }
+
+      function calculateMean(data) {
+        let sum = 0;
+        let mean = 0;
+        for (let i = 0; i < data.length; i++) {
+          sum = sum + data[i];
+        }
+        mean = sum / data.length;
+        return mean;
+      }
+
+      function calculateMedian(data) {
+        let sorted_data = data.sort();
+        let length = sorted_data.length;
+        let mid = Math.ceil(length / 2);
+        let sol =
+          length % 2 != 0
+            ? sorted_data[mid - 1]
+            : (sorted_data[mid] + sorted_data[mid - 1]) / 2;
+        return sol;
+      }
+
+      function calculateMode(data) {
+        let hash = new Map();
+        let max = 0;
+        for (let i = 0; i < data.length; i++) {
+          if (hash.has(data[i])) {
+            console.log("Present");
+            hash.set(data[i], hash.get(data[i]) + 1);
+            max = Math.max(max, hash.get(data[i]));
+          } else {
+            console.log("Absent");
+            hash.set(data[i], 1);
+          }
+        }
+        let maxim = 0;
+        let elms = [];
+        hash.forEach((value, key) => {
+          if (value > maxim) {
+            maxim = value;
+            elm = key;
+          }
+        });
+        hash.forEach((value, key) => {
+          if (value == maxim) {
+            elms.push(key);
+          }
+        });
+        return elms;
+      }
+
+      function calculateMMM(data) {
+        try {
+          var array = JSON.parse("[" + data.value + "]");
+          console.log(array);
+          let isValid = validateInput(array);
+          if (isValid) {  
+            let mean = calculateMean(array);
+            mean != NaN
+              ? (document.getElementById("mean-id").innerHTML = mean)
+              : (document.getElementById("mean-id").innerHTML = "0");
+            let median = calculateMedian(array);
+            document.getElementById("median-id").innerHTML = median;
+            let mode = calculateMode(array);
+            let div = document.getElementById("mode-id");
+            if (mode.length > 0) {
+              div.innerHTML = "";
+              for (let i = 0; i < mode.length; i++) {
+                var span = document.createElement("span");
+                span.setAttribute("class", "new");
+                span.innerHTML = mode[i] + " ";
+                div.appendChild(span);
+              }
+            } else {
+              div.innerHTML = "None";
+            }
+          }
+          for(let i in array){
+            updateChart(myChart,{
+                x:i,
+                y:0,
+                r:10
+            });
+          }
+          
+        } catch (e) {
+          console.log(e);
+        }
+      }
+      
+        
+
+        
+    
+    
+
+
+    </script>
+    <script
+      src="https://cdn.jsdelivr.net/npm/bootstrap@5.0.2/dist/js/bootstrap.bundle.min.js"
+      integrity="sha384-MrcW6ZMFYlzcLA8Nl+NtUVF0sA7MsXsP1UyJoMp4YLEuNSfAP+JcXn/tWtIaxVXM"
+      crossorigin="anonymous"
+    ></script>
+  </body>
+</html>
